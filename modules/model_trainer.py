@@ -7,14 +7,14 @@ import xgboost as xgb
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 import joblib
-import config
+import app_config
 from modules.utils import load_from_csv
 import os
 
 def get_data_for_model(stock_code):
     """Loads processed data and prepares it for model training."""
-    df = load_from_csv(config.PROCESSED_DATA_DIR, f"{stock_code}_processed_data.csv")
-    df['target'] = df['close'].shift(-config.MONTHLY_RETURN_DAYS) # Predicting 30 days ahead
+    df = load_from_csv(app_config.PROCESSED_DATA_DIR, f"{stock_code}_processed_data.csv")
+    df['target'] = df['close'].shift(-app_config.MONTHLY_RETURN_DAYS) # Predicting 30 days ahead
     df.dropna(inplace=True)
     X = df.drop(columns=['target', 'date', 'stock_code'])
     y = df['target']
@@ -45,24 +45,24 @@ def train_lstm(X_train, y_train):
 def train_and_save_models_for_stock(stock_code):
     """Trains all models for a given stock and saves them."""
     X, y = get_data_for_model(stock_code)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1 - config.TRAIN_TEST_SPLIT_RATIO, shuffle=False)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1 - app_config.TRAIN_TEST_SPLIT_RATIO, shuffle=False)
 
     print(f"Training models for {stock_code}...")
     rf_model = train_random_forest(X_train, y_train)
     xgb_model = train_xgboost(X_train, y_train)
     lstm_model = train_lstm(X_train, y_train)
 
-    if not os.path.exists(config.MODEL_DIR):
-        os.makedirs(config.MODEL_DIR)
+    if not os.path.exists(app_config.MODEL_DIR):
+        os.makedirs(app_config.MODEL_DIR)
 
-    joblib.dump(rf_model, os.path.join(config.MODEL_DIR, f"{stock_code}_rf_model.pkl"))
-    joblib.dump(xgb_model, os.path.join(config.MODEL_DIR, f"{stock_code}_xgb_model.pkl"))
-    lstm_model.save(os.path.join(config.MODEL_DIR, f"{stock_code}_lstm_model.h5"))
+    joblib.dump(rf_model, os.path.join(app_config.MODEL_DIR, f"{stock_code}_rf_model.pkl"))
+    joblib.dump(xgb_model, os.path.join(app_config.MODEL_DIR, f"{stock_code}_xgb_model.pkl"))
+    lstm_model.save(os.path.join(app_config.MODEL_DIR, f"{stock_code}_lstm_model.h5"))
 
     print(f"Models for {stock_code} saved.")
 
 def train_models_for_all_stocks():
     """Trains models for all stocks."""
-    stocks = [f.split('_')[0] for f in os.listdir(config.PROCESSED_DATA_DIR)]
+    stocks = [f.split('_')[0] for f in os.listdir(app_config.PROCESSED_DATA_DIR)]
     for stock in stocks:
         train_and_save_models_for_stock(stock)
