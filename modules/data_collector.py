@@ -3,18 +3,18 @@
 import datetime
 from breeze_connect import BreezeConnect
 import pandas as pd
-import config
+import app_config
 from modules.utils import save_to_csv
 
 def get_stock_list():
     """Reads the list of stock codes from the stocknames.txt file."""
-    with open(config.STOCK_LIST_FILE, 'r') as f:
+    with open(app_config.STOCK_LIST_FILE, 'r') as f:
         stocks = [line.strip() for line in f.readlines()]
     return stocks
 
 def initialize_breeze():
     """Initializes the Breeze API connection."""
-    return BreezeConnect(api_key=config.API_KEY)
+    return BreezeConnect(api_key=app_config.API_KEY)
 
 def get_historical_data_for_stock(breeze, stock_code, from_date, to_date, interval):
     """Fetches historical data for a single stock."""
@@ -43,15 +43,15 @@ def collect_all_historical_data():
     breeze = initialize_breeze()
     # You will need to handle the login flow here as per the Breeze API documentation
     # This might involve redirecting the user to a login URL to get a session token.
-    # For this example, we assume the session token is already set in config.py
-    # breeze.generate_session(api_secret=config.API_SECRET, session_token=config.SESSION_TOKEN)
+    # For this example, we assume the session token is already set in app_config.py
+    # breeze.generate_session(api_secret=app_config.API_SECRET, session_token=app_config.SESSION_TOKEN)
 
     stocks = get_stock_list()
-    from_date = (datetime.datetime.today() - datetime.timedelta(days=365 * config.FROM_DATE_YEARS)).strftime('%Y-%m-%d') + 'T05:30:00.000Z'
+    from_date = (datetime.datetime.today() - datetime.timedelta(days=365 * app_config.FROM_DATE_YEARS)).strftime('%Y-%m-%d') + 'T05:30:00.000Z'
     to_date = datetime.datetime.today().strftime('%Y-%m-%d') + 'T05:30:00.000Z'
 
     for stock in stocks:
         print(f"Fetching data for {stock}...")
-        df = get_historical_data_for_stock(breeze, stock, from_date, to_date, config.INTERVAL)
+        df = get_historical_data_for_stock(breeze, stock, from_date, to_date, app_config.INTERVAL)
         if df is not None and not df.empty:
-            save_to_csv(df, config.HISTORICAL_DATA_DIR, f"{stock}_historical_data.csv")
+            save_to_csv(df, app_config.HISTORICAL_DATA_DIR, f"{stock}_historical_data.csv")
