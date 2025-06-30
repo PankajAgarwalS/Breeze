@@ -2,7 +2,7 @@
 
 import pandas as pd
 import numpy as np
-import config
+import app_config
 
 def run_simple_backtest(stock_code):
     """Runs a simple backtest on historical predictions."""
@@ -10,7 +10,7 @@ def run_simple_backtest(stock_code):
     # It would involve generating predictions for each point in the test set
     # and simulating trades.
 
-    processed_data = pd.read_csv(f"{config.PROCESSED_DATA_DIR}{stock_code}_processed_data.csv")
+    processed_data = pd.read_csv(f"{app_config.PROCESSED_DATA_DIR}{stock_code}_processed_data.csv")
     returns = processed_data['close'].pct_change().dropna()
 
     # Assuming a simple long-only strategy
@@ -30,7 +30,7 @@ def run_simple_backtest(stock_code):
 def perform_full_backtesting():
     """Performs backtesting for all stocks."""
     results = []
-    stocks = [f.split('_')[0] for f in os.listdir(config.PROCESSED_DATA_DIR)]
+    stocks = [f.split('_')[0] for f in os.listdir(app_config.PROCESSED_DATA_DIR)]
     for stock in stocks:
         results.append(run_simple_backtest(stock))
     return pd.DataFrame(results)
