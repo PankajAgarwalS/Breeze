@@ -1,6 +1,9 @@
 pandas
 numpy
-pandas_ta
-xgboost
 scikit-learn
-joblib
+tensorflow
+xgboost
+matplotlib
+seaborn
+tqdm
+breeze-connect
