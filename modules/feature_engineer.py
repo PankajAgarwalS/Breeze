@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-import config
+import app_config
 from modules.utils import load_from_csv, save_to_csv
 
 def calculate_ema(data, window):
@@ -44,18 +44,18 @@ def engineer_features_for_stock(stock_code):
     """
     Loads raw data for a stock, engineers features, and saves the processed data.
     """
-    df = load_from_csv(config.HISTORICAL_DATA_DIR, f"{stock_code}_historical_data.csv")
+    df = load_from_csv(app_config.HISTORICAL_DATA_DIR, f"{stock_code}_historical_data.csv")
 
-    for window in config.EMA_WINDOWS:
+    for window in app_config.EMA_WINDOWS:
         df[f'ema_{window}'] = calculate_ema(df, window)
 
-    df['rsi'] = calculate_rsi(df, config.RSI_WINDOW)
+    df['rsi'] = calculate_rsi(df, app_config.RSI_WINDOW)
 
-    df['macd'], df['macd_signal'] = calculate_macd(df, config.MACD_FAST, config.MACD_SLOW, config.MACD_SIGNAL)
+    df['macd'], df['macd_signal'] = calculate_macd(df, app_config.MACD_FAST, app_config.MACD_SLOW, app_config.MACD_SIGNAL)
 
-    df['bb_upper'], df['bb_lower'] = calculate_bollinger_bands(df, config.BB_WINDOW)
+    df['bb_upper'], df['bb_lower'] = calculate_bollinger_bands(df, app_config.BB_WINDOW)
 
-    df = create_lagged_features(df, config.LAG_FEATURES)
+    df = create_lagged_features(df, app_config.LAG_FEATURES)
 
     df.dropna(inplace=True)
 
@@ -64,11 +64,11 @@ def engineer_features_for_stock(stock_code):
     feature_cols = [col for col in df.columns if col not in ['date', 'stock_code']]
     df[feature_cols] = scaler.fit_transform(df[feature_cols])
 
-    save_to_csv(df, config.PROCESSED_DATA_DIR, f"{stock_code}_processed_data.csv")
+    save_to_csv(df, app_config.PROCESSED_DATA_DIR, f"{stock_code}_processed_data.csv")
     print(f"Feature engineering complete for {stock_code}")
 
 def engineer_features_for_all_stocks():
     """Runs the feature engineering process for all stocks."""
-    stocks = [f.split('_')[0] for f in os.listdir(config.HISTORICAL_DATA_DIR)]
+    stocks = [f.split('_')[0] for f in os.listdir(app_config.HISTORICAL_DATA_DIR)]
     for stock in stocks:
         engineer_features_for_stock(stock)
