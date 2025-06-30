@@ -36,11 +36,19 @@ def get_historical_data_for_stock(breeze, stock_code, from_date, to_date, interv
         print(f"An exception occurred while fetching data for {stock_code}: {e}")
         return None
 
+# In modules/data_collector.py
+
 def collect_all_historical_data():
-    """
-    Fetches historical data for all stocks in the list and saves it to CSV files.
-    """
-    breeze = initialize_breeze()
+    # ...
+    breeze = initialize_breeze() # This does breeze = BreezeConnect(api_key=...)
+
+    try:
+        # This is the same as your breeze.generate_session(...) call
+        breeze.generate_session(api_secret=app_config.API_SECRET,
+                                session_token=app_config.SESSION_TOKEN)
+        
+        print("API Session Generated Successfully!")
+        # ... the rest of the code ...
     # You will need to handle the login flow here as per the Breeze API documentation
     # This might involve redirecting the user to a login URL to get a session token.
     # For this example, we assume the session token is already set in app_config.py
